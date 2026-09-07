@@ -1,0 +1,104 @@
+from http.server import BaseHTTPRequestHandler
+import os
+
+from config import IMAGES_DIR, ALLOWED_EXTENSIONS
+from pages import home_page, upload_page, gallery_page
+from responses import send_html, send_error_response
+from upload import handle_upload
+
+
+class ImageServer(BaseHTTPRequestHandler):
+
+    def do_GET(self):
+
+        if self.path == "/":
+            send_html(
+                self,
+                200,
+                home_page()
+            )
+            return
+
+        if self.path == "/upload":
+            send_html(
+                self,
+               200,
+                upload_page()
+            )
+            return
+
+        if self.path == "/favicon.ico":
+            self.send_response(204)
+            self.end_headers()
+            return
+
+        if self.path == "/static/style.css":
+            with open("static/style.css", "rb") as file:
+                css = file.read()
+
+            self.send_response(200)
+            self.send_header(
+                "Content-Type",
+                "text/css; charset=utf-8"
+            )
+            self.send_header(
+                "Content-Length",
+                str(len(css))
+            )
+            self.end_headers()
+
+            self.wfile.write(css)
+            return
+
+        if self.path == "/static/music.mp3":
+            with open("static/music.mp3", "rb") as file:
+                music = file.read()
+
+            self.send_response(200)
+            self.send_header(
+                "Content-Type",
+                "audio/mpeg"
+            )
+            self.send_header(
+                "Content-Length",
+                str(len(music))
+            )
+            self.end_headers()
+
+            self.wfile.write(music)
+            return
+
+        if self.path == "/images/":
+            files = os.listdir(IMAGES_DIR)
+
+            image_files = [
+                file
+                for file in files
+                if os.path.splitext(file)[1].lower()
+                in ALLOWED_EXTENSIONS
+            ]
+
+            send_html(
+                self,
+                200,
+                gallery_page(image_files)
+            )
+            return
+
+        print("NOT FOUND PATH:", self.path)
+
+        send_error_response(
+            self,
+            "Страница не найдена."
+        )
+
+    def do_POST(self):
+
+        if self.path != "/upload":
+            send_error_response(
+                self,
+                "Неверный путь."
+            )
+            return
+
+        handle_upload(self)

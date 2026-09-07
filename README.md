@@ -1,0 +1,112 @@
+# ImageManager
+
+ImageManager is a simple image upload and gallery server built with Python, Docker and Nginx.
+
+## Features
+
+- Upload JPG, PNG and GIF images
+- Maximum file size: 5 MB
+- Automatically generates a unique filename for each uploaded image
+- Image gallery
+- Direct image access through Nginx
+- Image preview in a modal window
+- Logging of successful uploads and errors
+- Persistent storage using Docker volumes
+- Nginx reverse proxy
+- Background music on web pages
+
+## Project Structure
+
+```ImageManagerProject/
+├── app.py
+├── server.py
+├── handlers.py
+├── pages.py
+├── responses.py
+├── upload.py
+├── config.py
+├── logger.py
+├── nginx.conf
+├── compose.yaml
+├── Dockerfile
+├── requirements.txt
+├── .dockerignore
+├── README.md
+├── images/
+├── logs/
+└── static/
+    ├── style.css
+    └── music.mp3
+```
+## Requirements 
+
+Python 3.12+
+Docker
+Docker Compose
+
+## Running the Project
+
+Build and start the application with:
+
+docker compose up --build
+
+The application will be available at:
+
+http://localhost:8080/
+
+The Python backend runs on:
+
+http://localhost:8000/
+
+## Available Routes
+Method	Route	Description
+GET	/	Home page
+GET	/upload	Image upload page
+POST	/upload	Upload an image
+GET	/images/	Image gallery
+GET	/images/<filename>	View an uploaded image
+
+## Upload Restrictions
+
+Allowed image formats:
+
+JPG
+PNG
+GIF
+
+Maximum file size:
+
+5 MB
+
+Uploaded files receive automatically generated unique names.
+
+## Logging
+
+Application logs are stored in:
+
+logs/app.log
+
+The application records successful uploads and errors.
+
+## Docker Volumes
+
+Images are stored persistently in:
+
+./images
+
+Logs are stored persistently in:
+
+./logs
+
+The data remains available after containers are stopped and restarted.
+
+## Technologies
+
+Python
+Python http.server
+Docker
+Docker Compose
+Nginx
+HTML
+CSS
+JavaScript
