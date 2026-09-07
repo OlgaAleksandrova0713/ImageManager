@@ -5,6 +5,7 @@ from config import IMAGES_DIR, ALLOWED_EXTENSIONS
 from pages import home_page, upload_page, gallery_page
 from responses import send_html, send_error_response
 from upload import handle_upload
+from delete import delete_image
 
 
 class ImageServer(BaseHTTPRequestHandler):
@@ -93,6 +94,28 @@ class ImageServer(BaseHTTPRequestHandler):
         )
 
     def do_POST(self):
+
+        if self.path.startswith("/delete/"):
+            filename = self.path[len("/delete/"):]
+
+            success = delete_image(filename)
+
+            if success:
+                send_html(
+                    self,
+                    200,
+                    """
+                    <h1>Image deleted successfully!</h1>
+                    <p><a href="/images/">Back to gallery</a></p>
+                    """
+                )
+            else:
+                send_error_response(
+                    self,
+                    "Ошибка: изображение не найдено."
+                )
+
+            return
 
         if self.path != "/upload":
             send_error_response(

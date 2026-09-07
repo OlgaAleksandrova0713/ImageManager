@@ -93,8 +93,18 @@ def gallery_page(image_files):
                 <img src="/images/{filename}"
                      onclick="openImage('/images/{filename}')"
                      style="width:200px; height:200px; object-fit:cover; cursor:pointer;">
+
                 <br>
+
                 {filename}
+
+                <br><br>
+
+                <button type="button"
+                        class="delete-button"
+                        onclick="openDeleteModal('/delete/{filename}')">
+                    &times;
+                </button>
             </div>
         """
 
@@ -104,6 +114,26 @@ def gallery_page(image_files):
             <div id="imageModal" class="modal">
                 <span class="close" onclick="closeImage()">&times;</span>
                 <img id="modalImage" class="modal-content" alt="Image">
+            </div>
+            
+            <div id="deleteModal" class="delete-modal">
+                <div class="delete-dialog">
+                     <h2>Delete image?</h2>
+                     <p>Are you sure you want to delete this image?</p>
+                     
+                     <form id="deleteForm" method="post">
+                         <button type="button"
+                                 class="cancel-button"
+                                 onclick="closeDeleteModal()">
+                             Cancel
+                         </button>
+                         
+                         <button type="submit"
+                                 class="confirm-delete-button">
+                             Delete
+                         </button>
+                     </form>
+                </div>
             </div>
 
             <script>
@@ -115,6 +145,19 @@ def gallery_page(image_files):
                 function closeImage() {
                     document.getElementById("imageModal").style.display = "none";
                 }
+                
+                let deleteUrl = "";
+
+                function openDeleteModal(url) {
+                    deleteUrl = url;
+                    document.getElementById("deleteForm").action = deleteUrl;
+                    document.getElementById("deleteModal").style.display = "flex";
+                }
+                
+                function closeDeleteModal() {
+                    document.getElementById("deleteModal").style.display = "none";
+                }
+                
             </script>
 
         </body>
