@@ -181,3 +181,39 @@ input[type="file"] {
 .confirm-delete-button:hover {
     background-color: #c0392b;
 }
+
+.download-button {
+    position: absolute;
+    top: 5px;
+    right: 38px;
+
+    width: 28px;
+    height: 28px;
+
+    background-color: #3498db;
+    color: white;
+
+    border: none;
+    border-radius: 50%;
+
+    font-size: 20px;
+    line-height: 28px;
+    text-align: center;
+    text-decoration: none;
+
+    cursor: pointer;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition: opacity 0.2s ease;
+}
+
+.image-card:hover .download-button {
+    opacity: 1;
+    visibility: visible;
+}
+
+.download-button:hover {
+    background-color: #2980b9;
+}

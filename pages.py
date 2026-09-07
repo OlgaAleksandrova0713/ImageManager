@@ -105,6 +105,11 @@ def gallery_page(image_files):
                         onclick="openDeleteModal('/delete/{filename}')">
                     &times;
                 </button>
+                
+                <a href="/download/{filename}" class="download-button" title="Download">
+                    &#8595;
+                </a>
+                
             </div>
         """
 

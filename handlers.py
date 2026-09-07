@@ -6,6 +6,7 @@ from pages import home_page, upload_page, gallery_page
 from responses import send_html, send_error_response
 from upload import handle_upload
 from delete import delete_image
+from download import get_image_for_download
 
 
 class ImageServer(BaseHTTPRequestHandler):
@@ -67,6 +68,36 @@ class ImageServer(BaseHTTPRequestHandler):
             self.end_headers()
 
             self.wfile.write(music)
+            return
+
+        if self.path.startswith("/download/"):
+            filename = self.path[len("/download/"):]
+
+            filename, data = get_image_for_download(filename)
+
+            if data is None:
+                send_error_response(
+                    self,
+                    "Ошибка: изображение не найдено."
+                )
+                return
+
+            self.send_response(200)
+            self.send_header(
+                "Content-Type",
+                "application/octet-stream"
+            )
+            self.send_header(
+                "Content-Disposition",
+                f"attachment; filename={filename}"
+            )
+            self.send_header(
+                "Content-Length",
+                str(len(data))
+            )
+            self.end_headers()
+
+            self.wfile.write(data)
             return
 
         if self.path == "/images/":
