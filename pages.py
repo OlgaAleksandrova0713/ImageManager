@@ -89,14 +89,14 @@ def gallery_page(image_files):
 
     for filename in image_files:
         html += f"""
-            <div class="image-card">
+            <div class="image-card" data-filename="{filename}">
                 <img src="/images/{filename}"
                      onclick="openImage('/images/{filename}')"
                      style="width:200px; height:200px; object-fit:cover; cursor:pointer;">
 
                 <br>
 
-                {filename}
+                <span class="filename">{filename}</span>
 
                 <br><br>
 
@@ -109,6 +109,13 @@ def gallery_page(image_files):
                 <a href="/download/{filename}" class="download-button" title="Download">
                     &#8595;
                 </a>
+                
+                <button type="button"
+                        class="rename-button"
+                        title="Rename"
+                        onclick="openRenameModal('/rename/{filename}', this.closest('.image-card'))">
+                    ✎
+                </button>
                 
             </div>
         """
@@ -140,33 +147,209 @@ def gallery_page(image_files):
                      </form>
                 </div>
             </div>
+            
+            <div id="renameModal" class="delete-modal">
+                <div class="delete-dialog">
+                    <h2>Rename image</h2>
+                    
+                    <form id="renameForm" method="post">
+                        <input
+                            type="text"
+                            id="newFilename"
+                            name="new_filename"
+                            required
+                        >
+                        
+                        <br><br>
+                        
+                        <button type="button"
+                                class="cancel-button"
+                                onclick="closeRenameModal()">
+                            Cancel
+                        </button>
+                        
+                        <button type="submit"
+                                class="confirm-delete-button">
+                            Rename
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+<script>
 
-            <script>
-                function openImage(src) {
-                    document.getElementById("modalImage").src = src;
-                    document.getElementById("imageModal").style.display = "flex";
+    function openImage(src) {
+        document.getElementById("modalImage").src = src;
+        document.getElementById("imageModal").style.display = "flex";
+    }
+
+    function closeImage() {
+        document.getElementById("imageModal").style.display = "none";
+    }
+
+
+    function openDeleteModal(url) {
+        document.getElementById("deleteForm").action = url;
+        document.getElementById("deleteModal").style.display = "flex";
+    }
+
+    function closeDeleteModal() {
+        document.getElementById("deleteModal").style.display = "none";
+    }
+
+
+    let renameUrl = "";
+    let renameCard = null;
+
+
+    function openRenameModal(url, card) {
+        renameUrl = url;
+        renameCard = card;
+
+        const oldFilename = card.dataset.filename;
+
+        document.getElementById("newFilename").value = oldFilename;
+        document.getElementById("renameModal").style.display = "flex";
+    }
+
+
+    function closeRenameModal() {
+        document.getElementById("renameModal").style.display = "none";
+    }
+
+
+    document.getElementById("renameForm").addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+            const form = event.target;
+            const newFilenameInput =
+                document.getElementById("newFilename");
+
+            const newFilename =
+                newFilenameInput.value.trim();
+
+            if (!newFilename || !renameCard) {
+                return;
+            }
+
+            try {
+                const response = await fetch(renameUrl, {
+                    method: "POST",
+                    body: new URLSearchParams(new FormData(form))
+                });
+
+                if (!response.ok) {
+                    console.error(
+                        "Rename failed:",
+                        response.status
+                    );
+                    return;
                 }
 
-                function closeImage() {
-                    document.getElementById("imageModal").style.display = "none";
-                }
-                
-                let deleteUrl = "";
+                const oldFilename =
+                    renameCard.dataset.filename;
 
-                function openDeleteModal(url) {
-                    deleteUrl = url;
-                    document.getElementById("deleteForm").action = deleteUrl;
-                    document.getElementById("deleteModal").style.display = "flex";
-                }
-                
-                function closeDeleteModal() {
-                    document.getElementById("deleteModal").style.display = "none";
-                }
-                
-            </script>
+                let finalFilename = newFilename;
 
-        </body>
-        </html>
-        """
+                if (!newFilename.includes(".")) {
+                    const dotIndex =
+                        oldFilename.lastIndexOf(".");
+
+                    if (dotIndex !== -1) {
+                        finalFilename =
+                            newFilename +
+                            oldFilename.substring(dotIndex);
+                    }
+                }
+
+                const encodedFilename =
+                    encodeURIComponent(finalFilename);
+
+                renameCard.dataset.filename =
+                    finalFilename;
+
+
+                const filenameElement =
+                    renameCard.querySelector(".filename");
+
+                if (filenameElement) {
+                    filenameElement.textContent =
+                        finalFilename;
+                }
+
+
+                const image =
+                    renameCard.querySelector("img");
+
+                if (image) {
+                    image.src =
+                        `/images/${encodedFilename}`;
+
+                    image.onclick = function() {
+                        openImage(
+                            `/images/${encodedFilename}`
+                        );
+                    };
+                }
+
+
+                const downloadButton =
+                    renameCard.querySelector(
+                        ".download-button"
+                    );
+
+                if (downloadButton) {
+                    downloadButton.href =
+                        `/download/${encodedFilename}`;
+                }
+
+
+                const deleteButton =
+                    renameCard.querySelector(
+                        ".delete-button"
+                    );
+
+                if (deleteButton) {
+                    deleteButton.onclick = function() {
+                        openDeleteModal(
+                            `/delete/${encodedFilename}`
+                        );
+                    };
+                }
+
+
+                const renameButton =
+                    renameCard.querySelector(
+                        ".rename-button"
+                    );
+
+                if (renameButton) {
+                    renameButton.onclick = function() {
+                        openRenameModal(
+                            `/rename/${encodedFilename}`,
+                            renameCard
+                        );
+                    };
+                }
+
+
+                closeRenameModal();
+
+            } catch (error) {
+                console.error(
+                    "Rename error:",
+                    error
+                );
+            }
+        }
+    );
+</script>
+          
+</body>
+</html>
+"""
 
     return html

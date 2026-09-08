@@ -39,12 +39,16 @@ input[type="file"] {
 }
 
 .gallery {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    width: 100%;
 }
 
 .image-card {
-    margin: 15px;
+    position: relative;
+    width: 200px;
+    margin: 0 auto;
     text-align: center;
     background-color: white;
     padding: 10px;
@@ -216,4 +220,39 @@ input[type="file"] {
 
 .download-button:hover {
     background-color: #2980b9;
+}
+
+.rename-button {
+    position: absolute;
+    top: 5px;
+    right:71px;
+
+    width: 28px;
+    height: 28px;
+
+    background-color: #f39c12;
+    color: white;
+
+    border: none;
+    border-radius: 50%;
+
+    font-size: 18px;
+    line-height: 28px;
+    text-align: center;
+
+    cursor: pointer;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition: opacity 0.2s ease;
+}
+
+.image-card:hover .rename-button {
+    opacity: 1;
+    visibility: visible;
+}
+
+.rename-button:hover {
+    background-color: #d68910;
 }

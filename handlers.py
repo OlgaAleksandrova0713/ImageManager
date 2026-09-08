@@ -7,6 +7,7 @@ from responses import send_html, send_error_response
 from upload import handle_upload
 from delete import delete_image
 from download import get_image_for_download
+from rename import rename_image
 
 
 class ImageServer(BaseHTTPRequestHandler):
@@ -144,6 +145,60 @@ class ImageServer(BaseHTTPRequestHandler):
                 send_error_response(
                     self,
                     "Ошибка: изображение не найдено."
+                )
+
+            return
+
+        if self.path.startswith("/rename/"):
+            old_filename = self.path[len("/rename/"):]
+
+            content_length = int(
+                self.headers.get("Content-Length", 0)
+            )
+
+            body = self.rfile.read(content_length)
+
+            from urllib.parse import parse_qs
+
+            form_data = parse_qs(
+                body.decode("utf-8")
+            )
+
+            new_filename = form_data.get(
+                "new_filename",
+                [""]
+            )[0].strip()
+
+            if not new_filename:
+                send_error_response(
+                    self,
+                    "Новое имя файла не указано."
+                )
+                return
+
+            success, message = rename_image(
+                old_filename,
+                new_filename
+            )
+
+            if success:
+                send_html(
+                    self,
+                    200,
+                    f"""
+                    <h1>Image renamed successfully!</h1>
+                    <p>{message}</p>
+                    <p>
+                        <a href="/images/">
+                            Back to gallery
+                        </a>
+                    </p>
+                    """
+                )
+            else:
+                send_error_response(
+                    self,
+                    message
                 )
 
             return
