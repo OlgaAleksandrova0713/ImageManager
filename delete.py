@@ -4,9 +4,12 @@ from config import IMAGES_DIR
 from logger import logger
 
 def delete_image(filename):
-    filename = os.path.basename(filename)
+    filename = filename.strip("/")
 
-    file_path = os.path.join(IMAGES_DIR, filename)
+    file_path = os.path.join(
+        IMAGES_DIR,
+        filename
+    )
 
     if not os.path.isfile(file_path):
         logger.error(
@@ -22,6 +25,5 @@ def delete_image(filename):
         filename
     )
     return True
-
 
 

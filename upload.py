@@ -43,100 +43,159 @@ def handle_upload(handler):
         headers.encode() + body
     )
 
+    category = None
+    image_part = None
+
     for part in message.iter_parts():
 
-        if part.get_param(
+        field_name = part.get_param(
             "name",
             header="Content-Disposition"
-        ) != "image":
-            continue
-
-        filename = part.get_filename()
-
-        if not filename:
-            send_error_response(
-                handler,
-                "Файл не выбран."
-            )
-            return
-
-        extension = os.path.splitext(filename)[1].lower()
-
-        if extension not in ALLOWED_EXTENSIONS:
-            send_error_response(
-                handler,
-                "Недопустимый формат файла. "
-                "Разрешены: JPG, PNG, GIF."
-            )
-            return
-
-        file_data = part.get_payload(decode=True)
-
-        if len(file_data) > MAX_FILE_SIZE:
-            send_error_response(
-                handler,
-                "Размер файла превышает допустимые 5 MB."
-            )
-            return
-
-        unique_filename = f"{uuid.uuid4()}{extension}"
-
-        os.makedirs(IMAGES_DIR, exist_ok=True)
-
-        file_path = os.path.join(
-            IMAGES_DIR,
-            unique_filename
         )
 
-        with open(file_path, "wb") as file:
-            file.write(file_data)
+        if field_name == "category":
+            category = part.get_payload(decode=True).decode("utf-8").strip()
 
-        logger.info(
-            "Успех: изображение %s загружено.",
-            unique_filename
+        elif field_name == "image":
+            image_part = part
+
+    if not category:
+        send_error_response(
+            handler,
+            "Category not selected."
         )
-
-        print(
-            f"SUCCESS: изображение {unique_filename} загружено."
-        )
-
-        response = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Upload successful</title>
-        </head>
-        <body>
-            <h1>Upload successful!</h1>
-
-            <p>Файл успешно загружен.</p>
-
-            <p>
-                <a href="/images/{unique_filename}">
-                    Открыть изображение
-                </a>
-            </p>
-
-            <p>
-                <a href="/upload">
-                    Загрузить ещё
-                </a>
-            </p>
-
-            <p>
-                <a href="/">
-                    На главную
-                </a>
-            </p>
-        </body>
-        </html>
-        """
-
-        send_html(handler, 200, response)
         return
 
-    send_error_response(
-        handler,
-        "Файл изображения не найден."
+    if image_part is None:
+        send_error_response(
+            handler,
+            "No file selected."
+        )
+        return
+
+    filename = image_part.get_filename()
+
+    if not filename:
+        send_error_response(
+            handler,
+            "No file selected."
+        )
+        return
+
+    extension = os.path.splitext(filename)[1].lower()
+
+    if extension not in ALLOWED_EXTENSIONS:
+        send_error_response(
+            handler,
+            "Invalid file format." "Allowed: JPG, PNG, GIF."
+        )
+        return
+
+    file_data = image_part.get_payload(decode=True)
+
+    if len(file_data) > MAX_FILE_SIZE:
+        send_error_response(
+            handler,
+            "The file size exceeds the 5 MB limit."
+        )
+        return
+
+    unique_filename = f"{uuid.uuid4()}{extension}"
+
+    category_dir = os.path.join(
+        IMAGES_DIR,
+        category
     )
+
+    os.makedirs(
+        category_dir,
+        exist_ok=True
+    )
+
+    file_path = os.path.join(
+        category_dir,
+        unique_filename
+    )
+
+    with open(file_path, "wb") as file:
+        file.write(file_data)
+
+    logger.info(
+        "Успех: изображение %s загружено.",
+        unique_filename
+    )
+
+    print(
+        f"SUCCESS: изображение {unique_filename} загружено."
+    )
+
+    response = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Upload successful</title>
+
+        <link rel="stylesheet" href="/static/style.css">
+        <link rel="stylesheet" href="/static/upload.css">
+    </head>
+
+    <body>
+
+        <div class="music-background"></div>
+
+        <div class="upload-page">
+
+            <div class="upload-card">
+
+            <h1 class="success-title">
+                ✓ Image uploaded successfully!
+            </h1>
+
+            <p class="success-text">
+                Your image has been uploaded successfully.
+            </p>
+
+            <div class="success-buttons">
+
+                <a
+                    href="/images/{category}/{unique_filename}"
+                     class="home-button"
+                >
+                    Open image
+                </a>
+
+                <a
+                    href="/upload"
+                    class="home-button"
+                >
+                    Upload another
+                </a>
+
+                <a
+                    href="/"
+                    class="home-button"
+                >
+                    Home
+                </a>
+
+            </div>
+
+        </div>
+
+        <audio controls loop>
+            <source src="/static/music.mp3" type="audio/mpeg">
+                Your browser does not support the audio element.
+        </audio>
+
+    </div>
+
+</body>
+</html>
+"""
+    send_html(
+        handler,
+        200,
+        response
+    )
+    return

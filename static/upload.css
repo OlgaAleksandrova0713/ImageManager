@@ -1,0 +1,124 @@
+.upload-page {
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px 30px;
+
+    box-sizing: border-box;
+}
+
+.upload-title {
+    margin: 0;
+
+    color: white;
+    font-size: 42px;
+
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.upload-subtitle {
+    margin-top: 10px;
+    margin-bottom: 30px;
+
+    color: #eee;
+    font-size: 20px;
+
+    text-align: center;
+}
+
+.upload-card {
+    width: 100%;
+    max-width: 500px;
+
+    padding: 35px;
+
+    box-sizing: border-box;
+
+    background-color: rgba(25, 10, 45, 0.85);
+
+    border-radius: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 20px;
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.upload-card form {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 20px;
+}
+
+.file-label {
+    color: white;
+    font-size: 18px;
+}
+
+.upload-card input[type="file"] {
+    width: 100%;
+
+    padding: 12px;
+
+    box-sizing: border-box;
+
+    background-color: white;
+
+    border-radius: 8px;
+}
+
+.upload-card button {
+    border: none;
+    cursor: pointer;
+}
+
+.upload-card .home-button {
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.success-title {
+    margin: 0;
+
+    color: white;
+    font-size: 28px;
+
+    text-align: center;
+}
+
+.success-text {
+    margin: 15px 0 25px;
+
+    color: #eee;
+    font-size: 18px;
+
+    text-align: center;
+}
+
+.success-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 12px;
+
+    width: 100%;
+}
+
+.success-buttons .home-button {
+    min-width: 220px;
+}

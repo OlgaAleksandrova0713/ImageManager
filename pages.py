@@ -7,21 +7,107 @@ def home_page():
         <title>Image Manager</title>
         <link rel="stylesheet" href="/static/style.css">
     </head>
+    
     <body>
-        <h1>Welcome to Image Manager!</h1>
+        
+        <div class="music-background"></div>
+        <div class="home-page">
 
-        <div>
-            <a href="/upload" class="button">Upload image</a>
-            <a href="/images/" class="button">View images</a>
+            <h1 class="home-title">
+                📷 IMAGE MANAGER
+            </h1>
+
+            <p class="home-subtitle">
+                Your personal image gallery
+            </p>
+
+            <div class="categories">
+
+                <a href="/category/fruits" class="category-card fruits-card">
+                    <div class="category-overlay">
+                        <h2>FRUITS</h2>
+                    </div>
+                </a>
+
+                <div class="category-card nature-card">
+                    <div class="category-overlay">
+                        <h2>NATURE</h2>
+                    </div>
+                </div>
+
+                <div class="category-card style-card">
+                    <div class="category-overlay">
+                        <h2>STYLE</h2>
+                    </div>
+                </div>
+
+                <div class="category-card animals-card">
+                    <div class="category-overlay">
+                        <h2>ANIMALS</h2>
+                    </div>
+                </div>
+
+                <div class="category-card city-card">
+                    <div class="category-overlay">
+                        <h2>CITY</h2>
+                    </div>
+                </div>
+
+                <div class="category-card other-card">
+                    <div class="category-overlay">
+                        <h2>OTHER</h2>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="home-buttons">
+                <a href="/upload" class="home-button">
+                    Upload new image
+                </a>
+
+                <a href="/images/" class="home-button">
+                    View gallery
+                </a>
+            </div>
+
+            <audio controls loop>
+                <source src="/static/music.mp3" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            
+<script>
+    const music = document.querySelector("audio");
+    const cards = document.querySelectorAll(".category-card");
+
+    music.addEventListener("play", function() {
+        cards.forEach(function(card) {
+            card.classList.add("music-active");
+        });
+    });
+
+    music.addEventListener("pause", function() {
+        cards.forEach(function(card) {
+            card.classList.remove("music-active");
+        });
+    });
+
+    music.addEventListener("ended", function() {
+        cards.forEach(function(card) {
+            card.classList.remove("music-active");
+        });
+    });
+
+    document.addEventListener("click", function startMusic() {
+        music.play().catch(function(error) {
+            console.log("Autoplay blocked:", error);
+        });
+
+        document.removeEventListener("click", startMusic);
+    });
+</script>
+
         </div>
-        
-        <br><br>
-
-        <audio controls loop>
-            <source src="/static/music.mp3" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
-        
 
     </body>
     </html>
@@ -34,37 +120,75 @@ def upload_page():
     <head>
         <meta charset="UTF-8">
         <title>Upload image</title>
+        
         <link rel="stylesheet" href="/static/style.css">
+        <link rel="stylesheet" href="/static/upload.css">
     </head>
     <body>
-        <h1>Upload image</h1>
-
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <input
-                type="file"
-                name="image"
-                accept=".jpg,.png,.gif"
-                required
-            >
-            <button type="submit">Upload</button>
-        </form>
-
-        <p>
-            <a href="/images/" class="button">View images</a>
+    
+        <div class="music-background"></div>
+        <div class="upload-page">
+        
+            <h1 class="upload-title">
+                📷 UPLOAD IMAGE
+            </h1>
+        
+        <p class="upload-subtitle">
+            Add a new image to your gallery
         </p>
         
-        <br><br>
-
+        <div class="upload-card">
+            
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <label class="file-label">
+                    Choose an image
+                </label>
+                
+                <input
+                    type="file"
+                    name="image"
+                    accept=".jpg,.png,.gif"
+                    required
+                >
+                
+                <label class="file-label">
+                    Choose a category
+                </label>
+                
+                <select name="category" required>
+                    <option value="">Select category</option>
+                    <option value="fruits">Fruits</option>
+                    <option value="nature">Nature</option>
+                    <option value="style">Style</option>
+                    <option value="animals">Animals</option>
+                    <option value="city">City</option>
+                    <option value="other">Other</option>
+                </select>
+                
+                <button type="submit" class="home-button">
+                    Upload image
+                </button>
+            
+            </form>
+            
+            <a href="/images/" class="home-button">
+                View images
+            </a>
+        
+        </div>
+        
         <audio controls loop>
             <source src="/static/music.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
-        
-    </body>
-    </html>
-    """
+    
+     </div>
 
-def gallery_page(image_files):
+</body>
+</html>
+"""
+
+def gallery_page(image_files, category=None):
     html = """
     <!DOCTYPE html>
     <html>
@@ -75,7 +199,7 @@ def gallery_page(image_files):
     </head>
 
     <body>
-        <h1>Image Gallery</h1>
+        <h1>{category.upper() if category else "Image Gallery"}</h1>
 
         <audio controls loop>
             <source src="/static/music.mp3" type="audio/mpeg">
@@ -89,34 +213,49 @@ def gallery_page(image_files):
 
     for filename in image_files:
         html += f"""
-            <div class="image-card" data-filename="{filename}">
-                <img src="/images/{filename}"
-                     onclick="openImage('/images/{filename}')"
+            <div class="image-card" 
+                data-filename="{filename}"
+                data-category="{category or ''}">
+                
+                <img src="/images/{category + '/' if category else ''}{filename}"
+                     onclick="openImage('/images/{category + '/' if category else ''}{filename}')"
                      style="width:200px; height:200px; object-fit:cover; cursor:pointer;">
-
-                <br>
-
-                <span class="filename">{filename}</span>
+                     
+                <div class="image-name">
+                    {filename}
+                </div>
 
                 <br><br>
 
                 <button type="button"
-                        class="delete-button"
-                        onclick="openDeleteModal('/delete/{filename}')">
-                    &times;
+                        class="menu-button"
+                        title="Actions"
+                        onclick="openActionsMenu(this)">
+                    ⋮
                 </button>
                 
-                <a href="/download/{filename}" class="download-button" title="Download">
-                    &#8595;
-                </a>
+                <div class="actions-menu">
+                    <a 
+                        href="/download/{category}/{filename}"
+                        class="action-menu-item"
+                        download
+                        onclick="showDownloadMessage(this)"
+                    >
+                       Download
+                    </a>
+                    
+                    <button type="button"
+                            onclick="openRenameFromMenu(this)">
+                        Rename
+                    </button>
+                    
+                    <button type="button"
+                            onclick="openDeleteFromMenu(this)">
+                        Delete
+                    </button>
+                </div>
                 
-                <button type="button"
-                        class="rename-button"
-                        title="Rename"
-                        onclick="openRenameModal('/rename/{filename}', this.closest('.image-card'))">
-                    ✎
-                </button>
-                
+   
             </div>
         """
 
@@ -186,21 +325,153 @@ def gallery_page(image_files):
     function closeImage() {
         document.getElementById("imageModal").style.display = "none";
     }
+    
+    function openActionsMenu(button) {
+        const card = button.closest(".image-card");
+        const menu = card.querySelector(".actions-menu");
+        
+        document.querySelectorAll(".actions-menu").forEach(function(item) {
+            if (item !== menu) {
+                item.style.display = "none";
+            }
+        });
+        
+        if (menu.style.display === "block") {
+            menu.style.display = "none";
+       } else {
+           menu.style.display = "block";
+       }
+    }
+    
+    function openDownloadFromMenu(button) {
+        const card = button.closest(".image-card");
+        const filename = card.dataset.filename;
+        const category = card.dataset.category;
 
+        const link = document.createElement("a");
+        link.href = `/download/${encodeURIComponent(category)}/${encodeURIComponent(filename)}`;
+        link.download = filename;
 
-    function openDeleteModal(url) {
-        document.getElementById("deleteForm").action = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        button.closest(".actions-menu").style.display = "none";
+    }
+    
+    function openRenameFromMenu(button) {
+        const card = button.closest(".image-card");
+        const filename = card.dataset.filename;
+        
+        button.closest(".actions-menu").style.display = "none";
+        
+        openRenameModal(
+            `/rename/${encodeURIComponent(card.dataset.category)}/${encodeURIComponent(filename)}`,
+            card
+        );
+    }
+    
+    function openDeleteFromMenu(button) {
+        const card = button.closest(".image-card");
+        const category = card.dataset.category;
+        const filename = card.dataset.filename;
+        
+        button.closest(".actions-menu").style.display = "none";
+
+        openDeleteModal(
+             `/delete/${encodeURIComponent(category)}/${encodeURIComponent(filename)}`,
+            card
+        );
+    }
+    
+    document.addEventListener("click", function(event) {
+        if (!event.target.closest(".image-card")) {
+            document.querySelectorAll(".actions-menu").forEach(function(menu) {
+                menu.style.display = "none";
+            });
+        }
+    });
+    
+    let deleteUrl = "";
+    let deleteCard = null;
+
+    function openDeleteModal(url, card) {
+        deleteUrl = url;
+        deleteCard = card;
+        
         document.getElementById("deleteModal").style.display = "flex";
     }
 
     function closeDeleteModal() {
         document.getElementById("deleteModal").style.display = "none";
     }
+    
+    document.getElementById("deleteForm").addEventListener(
+        "submit",
+        async function(event) {
+        
+            event.preventDefault();
+        
+            if (!deleteUrl || !deleteCard) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(deleteUrl, {
+                    method: "POST"
+                });
+                
+            if (!response.ok) {
+                console.error(
+                    "Delete failed:",
+                    response.status
+                );
+                return;
+            }
+        
+        showMessage(
+            "Image deleted successfully!",
+            deleteCard
+        );
+        
+        deleteCard.remove();
+            
+        closeDeleteModal();
+        
+            
+        } catch (error) {
+            console.error(
+                "Delete error:",
+                error
+            );
+        }
+    }
+);
 
+function showMessage(message, card) {
+    const messageBox = document.createElement("div");
+            
+    messageBox.textContent = message;
+    messageBox.className = "message-box";
+    
+    document.body.appendChild(messageBox);
+            
+    setTimeout(function() {
+        messageBox.remove();
+    }, 2500);
+}
 
+function showDownloadMessage(link) {
+    setTimeout(function() {
+        showMessage(
+            "Image downloaded successfully!",
+            link.closest(".image-card")
+        );
+    }, 3000);
+}
+            
     let renameUrl = "";
     let renameCard = null;
-
 
     function openRenameModal(url, card) {
         renameUrl = url;
@@ -273,7 +544,7 @@ def gallery_page(image_files):
 
 
                 const filenameElement =
-                    renameCard.querySelector(".filename");
+                    renameCard.querySelector(".image-name");
 
                 if (filenameElement) {
                     filenameElement.textContent =
@@ -285,12 +556,15 @@ def gallery_page(image_files):
                     renameCard.querySelector("img");
 
                 if (image) {
+                    const category =
+                        renameCard.dataset.category;
+                        
                     image.src =
-                        `/images/${encodedFilename}`;
+                        `/images/${category}/${encodedFilename}`;
 
                     image.onclick = function() {
                         openImage(
-                            `/images/${encodedFilename}`
+                            `/images/${category}/${encodedFilename}`
                         );
                     };
                 }

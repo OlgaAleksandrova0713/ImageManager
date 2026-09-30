@@ -4,8 +4,6 @@ from config import IMAGES_DIR
 
 
 def get_image_for_download(filename):
-    filename = os.path.basename(filename)
-
     file_path = os.path.join(
         IMAGES_DIR,
         filename
@@ -17,4 +15,5 @@ def get_image_for_download(filename):
     with open(file_path, "rb") as file:
         data = file.read()
 
-    return filename, data
+    return os.path.basename(filename), data
+

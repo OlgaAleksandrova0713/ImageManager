@@ -4,7 +4,7 @@ from config import IMAGES_DIR, ALLOWED_EXTENSIONS
 from logger import logger
 
 def rename_image(old_filename, new_filename):
-    old_filename = os.path.basename(old_filename)
+    old_filename = old_filename.strip("/")
     new_filename = os.path.basename(new_filename)
 
     old_extension = os.path.splitext(old_filename)[1].lower()
@@ -33,8 +33,11 @@ def rename_image(old_filename, new_filename):
         old_filename
     )
 
+    category = os.path.dirname(old_filename)
+
     new_path = os.path.join(
         IMAGES_DIR,
+        category,
         new_filename
     )
 
@@ -61,6 +64,5 @@ def rename_image(old_filename, new_filename):
     )
 
     return True, "Изображение успешно переименовано."
-
 
 

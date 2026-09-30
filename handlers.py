@@ -72,9 +72,13 @@ class ImageServer(BaseHTTPRequestHandler):
             return
 
         if self.path.startswith("/download/"):
-            filename = self.path[len("/download/"):]
+            path = self.path[len("/download/"):]
 
-            filename, data = get_image_for_download(filename)
+            category, filename = path.split("/", 1)
+
+            filename, data = get_image_for_download(
+                os.path.join(category, filename)
+            )
 
             if data is None:
                 send_error_response(
@@ -99,6 +103,31 @@ class ImageServer(BaseHTTPRequestHandler):
             self.end_headers()
 
             self.wfile.write(data)
+            return
+
+        if self.path == "/category/fruits":
+            category_dir = os.path.join(
+                IMAGES_DIR,
+                "fruits"
+            )
+
+            files = os.listdir(category_dir)
+
+            image_file = [
+                file
+                for file in files
+                if os.path.splitext(file)[1].lower()
+                in ALLOWED_EXTENSIONS
+            ]
+
+            send_html(
+                self,
+                200,
+                gallery_page(
+                    image_file,
+                    "fruits"
+                )
+            )
             return
 
         if self.path == "/images/":
