@@ -130,15 +130,161 @@ class ImageServer(BaseHTTPRequestHandler):
             )
             return
 
-        if self.path == "/images/":
-            files = os.listdir(IMAGES_DIR)
+        if self.path == "/category/nature":
+            category_dir = os.path.join(
+                IMAGES_DIR,
+                "nature"
+            )
 
-            image_files = [
+            files = os.listdir(category_dir)
+
+            image_file = [
                 file
                 for file in files
                 if os.path.splitext(file)[1].lower()
                 in ALLOWED_EXTENSIONS
             ]
+
+            send_html(
+                self,
+                200,
+                gallery_page(
+                    image_file,
+                    "nature"
+                )
+            )
+            return
+
+        if self.path == "/category/style":
+            category_dir = os.path.join(
+                IMAGES_DIR,
+                "style"
+            )
+
+            files = os.listdir(category_dir)
+
+            image_file = [
+                file
+                for file in files
+                if os.path.splitext(file)[1].lower()
+                   in ALLOWED_EXTENSIONS
+            ]
+
+            send_html(
+                self,
+                200,
+                gallery_page(
+                    image_file,
+                    "style"
+                )
+            )
+            return
+
+        if self.path == "/category/animals":
+            category_dir = os.path.join(
+                IMAGES_DIR,
+                "animals"
+            )
+
+            files = os.listdir(category_dir)
+
+            image_file = [
+                file
+                for file in files
+                if os.path.splitext(file)[1].lower()
+                   in ALLOWED_EXTENSIONS
+            ]
+
+            send_html(
+                self,
+                200,
+                gallery_page(
+                    image_file,
+                    "animals"
+                )
+            )
+            return
+
+        if self.path == "/category/city":
+            category_dir = os.path.join(
+                IMAGES_DIR,
+                "city"
+            )
+
+            files = os.listdir(category_dir)
+
+            image_file = [
+                file
+                for file in files
+                if os.path.splitext(file)[1].lower()
+                   in ALLOWED_EXTENSIONS
+            ]
+
+            send_html(
+                self,
+                200,
+                gallery_page(
+                    image_file,
+                    "city"
+                )
+            )
+            return
+
+        if self.path == "/category/other":
+            category_dir = os.path.join(
+                IMAGES_DIR,
+                "other"
+            )
+
+            files = os.listdir(category_dir)
+
+            image_file = [
+                file
+                for file in files
+                if os.path.splitext(file)[1].lower()
+                   in ALLOWED_EXTENSIONS
+            ]
+
+            send_html(
+                self,
+                200,
+                gallery_page(
+                    image_file,
+                    "other"
+                )
+            )
+            return
+
+
+        if self.path == "/images/":
+            image_files = []
+
+            categories = [
+                "fruits",
+                "nature",
+                "style",
+                "animals",
+                "city",
+                "other"
+            ]
+
+            for category_name in categories:
+                category_dir = os.path.join(
+                    IMAGES_DIR,
+                    category_name
+                )
+
+                if not os.path.isdir(category_dir):
+                    continue
+
+                for filename in os.listdir(category_dir):
+                    if (
+                            os.path.splitext(filename)[1].lower()
+                            in ALLOWED_EXTENSIONS
+                    ):
+                        image_files.append(
+                            (category_name, filename)
+                        )
 
             send_html(
                 self,

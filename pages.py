@@ -29,35 +29,35 @@ def home_page():
                     </div>
                 </a>
 
-                <div class="category-card nature-card">
+                <a href="/category/nature" class="category-card nature-card">
                     <div class="category-overlay">
                         <h2>NATURE</h2>
                     </div>
-                </div>
+                </a>
 
-                <div class="category-card style-card">
+                <a href="/category/style" class="category-card style-card">
                     <div class="category-overlay">
                         <h2>STYLE</h2>
                     </div>
-                </div>
+                </a>
 
-                <div class="category-card animals-card">
+                <a href="/category/animals" class="category-card animals-card">
                     <div class="category-overlay">
                         <h2>ANIMALS</h2>
                     </div>
-                </div>
+                </a>
 
-                <div class="category-card city-card">
+                <a href="/category/city" class="category-card city-card">
                     <div class="category-overlay">
                         <h2>CITY</h2>
                     </div>
-                </div>
+                </a>
 
-                <div class="category-card other-card">
+                <a href="/category/other" class="category-card other-card">
                     <div class="category-overlay">
                         <h2>OTHER</h2>
                     </div>
-                </div>
+                </a>
 
             </div>
 
@@ -80,28 +80,55 @@ def home_page():
     const music = document.querySelector("audio");
     const cards = document.querySelectorAll(".category-card");
 
+    music.addEventListener("timeupdate", function() {
+        sessionStorage.setItem("musicTime", music.currentTime);
+    });
+
     music.addEventListener("play", function() {
+        sessionStorage.setItem("musicPlaying", "true");
+
         cards.forEach(function(card) {
             card.classList.add("music-active");
         });
     });
 
     music.addEventListener("pause", function() {
+        sessionStorage.setItem("musicPlaying", "false");
+
         cards.forEach(function(card) {
             card.classList.remove("music-active");
         });
     });
 
     music.addEventListener("ended", function() {
+        sessionStorage.setItem("musicPlaying", "false");
+
         cards.forEach(function(card) {
             card.classList.remove("music-active");
         });
     });
 
-    document.addEventListener("click", function startMusic() {
+    const savedTime = sessionStorage.getItem("musicTime");
+    const musicPlaying = sessionStorage.getItem("musicPlaying");
+
+    if (savedTime) {
+        music.currentTime = parseFloat(savedTime);
+    }
+
+    if (musicPlaying === "true") {
         music.play().catch(function(error) {
             console.log("Autoplay blocked:", error);
         });
+    }
+     document.addEventListener("click", function startMusic() {
+        const musicPlaying =
+            sessionStorage.getItem("musicPlaying");
+
+        if (musicPlaying !== "false") {
+            music.play().catch(function(error) {
+                console.log("Autoplay blocked:", error);
+            });
+        }
 
         document.removeEventListener("click", startMusic);
     });
@@ -189,6 +216,8 @@ def upload_page():
 """
 
 def gallery_page(image_files, category=None):
+    category_title = category.upper() if category else "IMAGE GALLERY"
+
     html = """
     <!DOCTYPE html>
     <html>
@@ -199,30 +228,72 @@ def gallery_page(image_files, category=None):
     </head>
 
     <body>
-        <h1>{category.upper() if category else "Image Gallery"}</h1>
+        <h1 class="gallery-page-title">""" + category_title + """</h1>
 
         <audio controls loop>
             <source src="/static/music.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
+        
+        <script>
+            const audio = document.querySelector("audio");
+
+            audio.addEventListener("timeupdate", function() {
+            sessionStorage.setItem("musicTime", audio.currentTime);
+            });
+
+            audio.addEventListener("play", function() {
+            sessionStorage.setItem("musicPlaying", "true");
+            });
+            
+            audio.addEventListener("pause", function() {
+            sessionStorage.setItem("musicPlaying", "false");
+            });
+
+            const savedTime = sessionStorage.getItem("musicTime");
+            const musicPlaying = sessionStorage.getItem("musicPlaying");
+
+            if (savedTime) {
+            audio.currentTime = parseFloat(savedTime);
+            }
+
+            if (musicPlaying === "true") {
+                audio.play().catch(function() {
+                    console.log("Autoplay was blocked by the browser.");
+                });
+            }
+        </script>
 
         <br><br>
 
-        <div class="gallery">
+         <div class="gallery">
     """
 
-    for filename in image_files:
+    for image in image_files:
+
+        if isinstance(image,tuple):
+            image_category, image_filename = image
+        else:
+            image_category = category
+            image_filename = image
+
+        image_path = (
+            f"{image_category}/{image_filename}"
+            if image_category
+            else image_filename
+        )
+
         html += f"""
             <div class="image-card" 
-                data-filename="{filename}"
-                data-category="{category or ''}">
+                data-filename="{image_filename}"
+                data-category="{image_category or ''}">
                 
-                <img src="/images/{category + '/' if category else ''}{filename}"
-                     onclick="openImage('/images/{category + '/' if category else ''}{filename}')"
-                     style="width:200px; height:200px; object-fit:cover; cursor:pointer;">
+                <img src="/images/{image_path}"
+                    onclick="openImage('/images/{image_path}')"
+                    style="width:200px; height:200px; object-fit:cover; cursor:pointer;">
                      
                 <div class="image-name">
-                    {filename}
+                    {image_filename}
                 </div>
 
                 <br><br>
@@ -236,7 +307,7 @@ def gallery_page(image_files, category=None):
                 
                 <div class="actions-menu">
                     <a 
-                        href="/download/{category}/{filename}"
+                        href="/download/{image_category}/{image_filename}"
                         class="action-menu-item"
                         download
                         onclick="showDownloadMessage(this)"
