@@ -6,6 +6,7 @@ import uuid
 from config import IMAGES_DIR, MAX_FILE_SIZE, ALLOWED_EXTENSIONS
 from logger import logger
 from responses import send_html, send_error_response
+from database import save_image_metadata
 
 
 def handle_upload(handler):
@@ -119,6 +120,13 @@ def handle_upload(handler):
 
     with open(file_path, "wb") as file:
         file.write(file_data)
+
+    save_image_metadata(
+        unique_filename,
+        filename,
+        len(file_data),
+        extension
+    )
 
     logger.info(
         "Успех: изображение %s загружено.",

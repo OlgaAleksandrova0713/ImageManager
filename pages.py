@@ -1,3 +1,5 @@
+import os
+
 def home_page():
     return """
     <!DOCTYPE html>
@@ -69,6 +71,11 @@ def home_page():
                 <a href="/images/" class="home-button">
                     View gallery
                 </a>
+                
+                <a href="/images-list" class="home-button">
+                    Image list 
+                </a>
+                
             </div>
 
             <audio controls loop>
@@ -199,7 +206,11 @@ def upload_page():
             </form>
             
             <a href="/images/" class="home-button">
-                View images
+                View gallery
+            </a>
+            
+            <a href="/images-list" class="home-button">
+                Image list
             </a>
         
         </div>
@@ -680,7 +691,6 @@ function showDownloadMessage(link) {
                     };
                 }
 
-
                 closeRenameModal();
 
             } catch (error) {
@@ -692,9 +702,132 @@ function showDownloadMessage(link) {
         }
     );
 </script>
-          
+
 </body>
 </html>
 """
-
     return html
+
+def images_list_page(images, page=1, total_image=0):
+    per_page = 10
+    total_pages = (total_image + per_page - 1) // per_page
+
+    rows = ""
+
+    for image in images:
+        image_id = image[0]
+        filename = image[1]
+        original_name = image[2]
+        size_kb = round(image[3] / 1024, 2)
+        upload_time = image[4]
+        file_type = image[5]
+        category = find_image_category(filename)
+
+        rows += f"""
+        <tr>
+            <td>
+                <a href="/images/{category}/{filename}">
+                    {filename}
+                </a>
+            </td>
+            <td>{original_name}</td>
+            <td>{size_kb} KB</td>
+            <td>{upload_time}</td>
+            <td>{file_type}</td>
+        </tr>
+        """
+
+    if not rows:
+        rows = """
+        <tr>
+            <td colspan="5">
+                Нет загруженных изображений
+            </td>
+        </tr>
+        """
+
+    navigation = ""
+
+    if page > 1:
+        navigation += f"""
+            <a href="/images-list?page={page - 1}">
+                Previous
+            </a>
+        """
+
+    if page < total_pages:
+        navigation += f"""
+            <a href="/images-list?page={page + 1}">
+                Next
+            </a>
+        """
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Images List</title>
+        
+        <link rel="stylesheet" href="/static/style.css">
+        <link rel="stylesheet" href="/static/images-list.css">
+    </head>
+
+    <body>
+
+        <div class="images-list-page">
+        
+            <div class="images-list-card">
+                <h1 class="images-list-title">
+                    Images List
+                </h1>
+                
+                <table class="images-table">
+                    <tr>
+                        <th>Filename</th>
+                        <th>Original name</th>
+                        <th>Size</th>
+                        <th>Upload time</th>
+                        <th>File type</th>
+                    </tr>
+
+                    {rows}
+                </table>
+                
+                <div class="images-navigation">
+                    {navigation}
+                </div>
+                
+                <p class="images-list-home">
+                    <a href="/">Home</a>
+                </p>
+
+            </div>
+
+        </div>
+
+    </body>
+                
+    """
+
+def find_image_category(filename):
+    categories = [
+        "fruits",
+        "nature",
+        "style",
+        "animals",
+        "city",
+        "other"
+    ]
+
+    for category in categories:
+        file_path = os.path.join(
+            "images",
+            category,
+            filename
+        )
+
+        if os.path.isfile(file_path):
+            return category
+
+    return None

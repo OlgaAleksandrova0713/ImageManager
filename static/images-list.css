@@ -1,0 +1,186 @@
+.images-list-page {
+    min-height: 100vh;
+    padding: 45px 35px;
+    box-sizing: border-box;
+}
+
+.images-list-card {
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 35px 40px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* Title */
+
+.images-list-title {
+    margin: 0 0 35px;
+    text-align: center;
+    color: white;
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+/* Table */
+
+.images-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.10);
+    color: white;
+}
+
+/* Header */
+
+.images-table th {
+    padding: 16px 14px;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.14);
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Cells */
+
+.images-table td {
+    padding: 16px 14px;
+    font-size: 14px;
+    line-height: 1.4;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    vertical-align: middle;
+    word-break: break-word;
+}
+
+/* Last row */
+
+.images-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Row hover */
+
+.images-table tr:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transition: background 0.2s ease;
+}
+
+/* Filename link */
+
+.images-table a {
+    color: #8fd3ff;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.images-table a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+/* Empty table */
+
+.no-images {
+    text-align: center;
+    padding: 30px;
+    color: white;
+    font-size: 17px;
+}
+
+/* Home button */
+
+.images-list-home {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0 0;
+}
+
+.images-list-home a {
+    display: inline-block;
+    min-width: 90px;
+    padding: 11px 24px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.16);
+    color: white;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.images-list-home a:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+
+@media (max-width: 800px) {
+
+    .images-list-page {
+        padding: 25px 15px;
+    }
+
+    .images-list-card {
+        padding: 25px 15px;
+    }
+
+    .images-list-title {
+        font-size: 28px;
+    }
+
+    .images-table {
+        font-size: 13px;
+    }
+}
+
+.images-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.10);
+    color: white;
+}
+
+.images-table th,
+    .images-table td {
+        padding: 11px 8px;
+}
+
+.images-navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin: 25px 0 5px;
+}
+
+.images-navigation a {
+    display: inline-block;
+    min-width: 90px;
+    padding: 11px 24px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.16);
+    color: white;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.images-navigation a:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+}

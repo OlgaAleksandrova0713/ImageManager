@@ -1,13 +1,15 @@
 from http.server import BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
 import os
 
 from config import IMAGES_DIR, ALLOWED_EXTENSIONS
-from pages import home_page, upload_page, gallery_page
+from pages import home_page, upload_page, gallery_page, images_list_page
 from responses import send_html, send_error_response
 from upload import handle_upload
 from delete import delete_image
 from download import get_image_for_download
 from rename import rename_image
+from database import get_images, get_images_count
 
 
 class ImageServer(BaseHTTPRequestHandler):
@@ -255,10 +257,7 @@ class ImageServer(BaseHTTPRequestHandler):
             )
             return
 
-
         if self.path == "/images/":
-            image_files = []
-
             categories = [
                 "fruits",
                 "nature",
@@ -268,28 +267,86 @@ class ImageServer(BaseHTTPRequestHandler):
                 "other"
             ]
 
-            for category_name in categories:
+            all_images = []
+
+            for category in categories:
                 category_dir = os.path.join(
                     IMAGES_DIR,
-                    category_name
+                    category
                 )
 
                 if not os.path.isdir(category_dir):
                     continue
 
-                for filename in os.listdir(category_dir):
-                    if (
-                            os.path.splitext(filename)[1].lower()
-                            in ALLOWED_EXTENSIONS
-                    ):
-                        image_files.append(
-                            (category_name, filename)
+                files = os.listdir(category_dir)
+
+                for filename in files:
+                    if os.path.splitext(filename)[1].lower() in ALLOWED_EXTENSIONS:
+                        all_images.append(
+                            (category, filename)
                         )
 
             send_html(
                 self,
                 200,
-                gallery_page(image_files)
+                gallery_page(
+                    all_images
+                )
+            )
+            return
+
+        if self.path.startswith("/images/"):
+            image_path = self.path[len("/images/"):]
+
+            file_path = os.path.join(
+                IMAGES_DIR,
+                image_path
+            )
+
+            if os.path.isfile(file_path):
+                with open(file_path, "rb") as file:
+                    content = file.read()
+
+                self.send_response(200)
+                self.send_header(
+                    "Content-Type",
+                     "image/jpeg"
+                )
+                self.send_header(
+                    "Content-Length",
+                    str(len(content))
+                )
+                self.end_headers()
+                self.wfile.write(content)
+                return
+
+            send_error_response(
+                self,
+                "Page not found."
+            )
+            return
+
+        if self.path.startswith("/images-list"):
+            query = urlparse(self.path).query
+            params = parse_qs(query)
+
+            page = int(params.get("page", [1])[0])
+
+            images = get_images(
+                page=page,
+                per_page=10
+            )
+
+            total_image = get_images_count()
+
+            send_html(
+                self,
+                200,
+                images_list_page(
+                    images,
+                    page,
+                    total_image
+                )
             )
             return
 
@@ -297,7 +354,7 @@ class ImageServer(BaseHTTPRequestHandler):
 
         send_error_response(
             self,
-            "Страница не найдена."
+            "Page not found."
         )
 
     def do_POST(self):
