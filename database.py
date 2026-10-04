@@ -164,3 +164,56 @@ def get_images_count():
     finally:
         cursor.close()
         connection.close()
+
+def get_image_by_id(image_id):
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            SELECT
+                id,
+                filename,
+                original_name,
+                size,
+                upload_time,
+                file_type
+            FROM images
+            WHERE id = %s
+            """,
+            (image_id,)
+        )
+
+        image = cursor.fetchone()
+
+        return image
+
+    finally:
+        cursor.close()
+        connection.close()
+
+def delete_image_metadata(image_id):
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            DELETE FROM images
+            WHERE id = %s
+            """,
+            (image_id,)
+        )
+
+        connection.commit()
+
+    except Exception:
+        connection.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        connection.close()

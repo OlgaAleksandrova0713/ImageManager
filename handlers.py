@@ -9,7 +9,12 @@ from upload import handle_upload
 from delete import delete_image
 from download import get_image_for_download
 from rename import rename_image
-from database import get_images, get_images_count
+from database import (
+    get_images,
+    get_images_count,
+    get_image_by_id,
+    delete_image_metadata
+)
 
 
 class ImageServer(BaseHTTPRequestHandler):
@@ -331,6 +336,7 @@ class ImageServer(BaseHTTPRequestHandler):
             params = parse_qs(query)
 
             page = int(params.get("page", [1])[0])
+            deleted = params.get("deleted", [None])[0]
 
             images = get_images(
                 page=page,
@@ -345,7 +351,8 @@ class ImageServer(BaseHTTPRequestHandler):
                 images_list_page(
                     images,
                     page,
-                    total_image
+                    total_image,
+                    deleted
                 )
             )
             return
@@ -360,24 +367,45 @@ class ImageServer(BaseHTTPRequestHandler):
     def do_POST(self):
 
         if self.path.startswith("/delete/"):
-            filename = self.path[len("/delete/"):]
+            image_id = self.path[len("/delete/"):]
+
+            try:
+                image_id = int(image_id)
+            except ValueError:
+                send_error_response(
+                    self,
+                    "Error: invalid image ID."
+                )
+                return
+
+            image = get_image_by_id(image_id)
+
+            if image is None:
+                send_error_response(
+                    self,
+                    "Error: image not found."
+                )
+                return
+
+            filename = image[1]
 
             success = delete_image(filename)
 
-            if success:
-                send_html(
-                    self,
-                    200,
-                    """
-                    <h1>Image deleted successfully!</h1>
-                    <p><a href="/images/">Back to gallery</a></p>
-                    """
-                )
-            else:
+            if not success:
                 send_error_response(
                     self,
-                    "Ошибка: изображение не найдено."
+                    "Error: image file not found."
                 )
+                return
+
+            delete_image_metadata(image_id)
+
+            self.send_response(303)
+            self.send_header(
+                "Location",
+                "/images-list?deleted=1"
+            )
+            self.end_headers()
 
             return
 

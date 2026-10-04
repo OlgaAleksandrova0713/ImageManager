@@ -708,7 +708,7 @@ function showDownloadMessage(link) {
 """
     return html
 
-def images_list_page(images, page=1, total_image=0):
+def images_list_page(images, page=1, total_image=0, deleted=None):
     per_page = 10
     total_pages = (total_image + per_page - 1) // per_page
 
@@ -726,7 +726,7 @@ def images_list_page(images, page=1, total_image=0):
         rows += f"""
         <tr>
             <td>
-                <a href="/images/{category}/{filename}">
+                <a href="{f'/images/{category}/{filename}' if category else f'/images/{filename}'}">
                     {filename}
                 </a>
             </td>
@@ -734,17 +734,34 @@ def images_list_page(images, page=1, total_image=0):
             <td>{size_kb} KB</td>
             <td>{upload_time}</td>
             <td>{file_type}</td>
+            <td>
+                <button
+                    type="button"
+                    class="delete-button"
+                    onclick="openDeleteModal({image_id})">
+                    Delete
+                </button>
+            </td>
         </tr>
         """
 
     if not rows:
         rows = """
         <tr>
-            <td colspan="5">
+            <td colspan="6">
                 Нет загруженных изображений
             </td>
         </tr>
         """
+
+    success_message = ""
+
+    if deleted == "1":
+        success_message = """
+            <div class="delete-success-message">
+                ✓ Image successfully deleted.
+            </div>
+            """
 
     navigation = ""
 
@@ -782,6 +799,22 @@ def images_list_page(images, page=1, total_image=0):
                     Images List
                 </h1>
                 
+                {success_message}
+                
+                <script>
+                    setTimeout(function() {{
+                        const message = document.querySelector(".delete-success-message");
+
+                        if (message) {{
+                            message.style.opacity = "0";
+
+                            setTimeout(function() {{
+                                message.remove();
+                            }}, 300);
+                        }}
+                    }}, 2000);
+                </script>
+                
                 <table class="images-table">
                     <tr>
                         <th>Filename</th>
@@ -789,10 +822,59 @@ def images_list_page(images, page=1, total_image=0):
                         <th>Size</th>
                         <th>Upload time</th>
                         <th>File type</th>
+                        <th>Delete</th>
                     </tr>
 
                     {rows}
                 </table>
+                <div id="deleteModal" class="delete-modal">
+
+                    <div class="delete-modal-content">
+
+                        <h2>Delete image?</h2>
+
+                        <p>
+                            Are you sure you want to delete this image?
+                        </p>
+
+                        <div class="delete-modal-buttons">
+
+                            <button
+                                type="button"
+                                class="delete-cancel-button"
+                                onclick="closeDeleteModal()">
+                                Cancel
+                            </button>
+
+                            <form id="deleteForm" method="POST">
+                                <button
+                                    type="submit"
+                                    class="delete-confirm-button">
+                                    Delete
+                                </button>
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+                <script>
+                    function openDeleteModal(imageId) {{
+                        const modal = document.getElementById("deleteModal");
+                        const form = document.getElementById("deleteForm");
+
+                    form.action = "/delete/" + imageId;
+
+                    modal.classList.add("show");
+                    }}
+
+                    function closeDeleteModal() {{
+                        const modal = document.getElementById("deleteModal");
+
+                        modal.classList.remove("show");
+                     }}
+                </script>
                 
                 <div class="images-navigation">
                     {navigation}
@@ -830,4 +912,4 @@ def find_image_category(filename):
         if os.path.isfile(file_path):
             return category
 
-    return None
+    return ""

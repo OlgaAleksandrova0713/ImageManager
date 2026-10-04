@@ -184,3 +184,124 @@
     background: rgba(255, 255, 255, 0.25);
     transform: translateY(-1px);
 }
+
+/* Delete button */
+.images-table .delete-button {
+    position: static;
+    display: inline-block;
+
+    width: auto;
+    min-width: 100px;
+    height: auto;
+
+    top: auto;
+    right: auto;
+
+    visibility: visible;
+    opacity: 1;
+
+    padding: 8px 16px;
+    border: none;
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, 0.16);
+    color: white;
+
+    font-size: 14px;
+    font-weight: 600;
+    line-height: normal;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.images-table .delete-button:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+/* Delete modal */
+
+.delete-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.delete-modal.show {
+    display: flex;
+}
+
+.delete-modal-content {
+    width: 420px;
+    max-width: 90%;
+    padding: 30px;
+    border-radius: 20px;
+    background: rgba(40, 25, 70, 0.95);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+    text-align: center;
+    color: white;
+}
+
+.delete-modal-content h2 {
+    margin: 0 0 15px;
+    font-size: 26px;
+}
+
+.delete-modal-content p {
+    margin: 0 0 25px;
+    font-size: 16px;
+}
+
+.delete-modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.delete-cancel-button,
+.delete-confirm-button {
+    min-width: 100px;
+    padding: 11px 20px;
+    border: none;
+    border-radius: 9px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.delete-cancel-button {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.delete-confirm-button {
+    background: rgba(220, 70, 70, 0.75);
+}
+
+.delete-cancel-button:hover,
+.delete-confirm-button:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+}
+
+/* Delete success message */
+
+.delete-success-message {
+    margin: 0 auto 25px;
+    padding: 12px 20px;
+    max-width: 500px;
+    border-radius: 10px;
+    background: rgba(80, 200, 120, 0.18);
+    border: 1px solid rgba(120, 255, 160, 0.35);
+    color: white;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+}
