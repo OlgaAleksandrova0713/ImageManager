@@ -12,10 +12,10 @@ def rename_image(old_filename, new_filename):
 
     if old_extension not in ALLOWED_EXTENSIONS:
         logger.error(
-            "Ошибка: недопустимый формат исходного файла %s.",
+            "Error: invalid format of source file %s.",
             old_filename
         )
-        return False, "Недопустимый формат исходного файла."
+        return False, "Invalid source file format."
 
     if not new_extension:
         new_filename = f"{new_filename}{old_extension}"
@@ -23,10 +23,10 @@ def rename_image(old_filename, new_filename):
 
     if new_extension not in ALLOWED_EXTENSIONS:
         logger.error(
-            "Ошибка: недопустимый формат нового файла %s.",
+            "Error: invalid format for new file %s.",
             new_filename
         )
-        return False, "Разрешены только JPG, PNG, GIF."
+        return False, "Only JPG, PNG, and GIF are allowed."
 
     old_path = os.path.join(
         IMAGES_DIR,
@@ -43,26 +43,26 @@ def rename_image(old_filename, new_filename):
 
     if not os.path.isfile(old_path):
         logger.error(
-            "Ошибка: файл %s не найден.",
+            "Error: file %s not found.",
             old_filename
         )
-        return False, "Изображение не найдено."
+        return False, "Image not found."
 
     if os.path.exists(new_path):
         logger.error(
-            "Ошибка: файл %s уже существует.",
+            "Error: file %s already exists.",
             new_filename
         )
-        return False, "Файл с таким именем уже существует."
+        return False, "A file with that name already exists."
 
     os.rename(old_path, new_path)
 
     logger.info(
-        "Успех: изображение %s переименовано в %s.",
+        "Success: Image %s renamed to %s.",
         old_filename,
         new_filename
     )
 
-    return True, "Изображение успешно переименовано."
+    return True, new_filename
 
 

@@ -13,7 +13,10 @@ from database import (
     get_images,
     get_images_count,
     get_image_by_id,
-    delete_image_metadata
+    delete_image_metadata,
+    get_image_by_filename,
+    delete_image_metadata_by_filename,
+    update_image_filename
 )
 
 
@@ -357,14 +360,52 @@ class ImageServer(BaseHTTPRequestHandler):
             )
             return
 
-        print("NOT FOUND PATH:", self.path)
-
         send_error_response(
             self,
             "Page not found."
         )
 
     def do_POST(self):
+
+        if self.path.startswith("/delete/") and self.path.count("/") >= 3:
+            path = self.path[len("/delete/"):]
+
+            try:
+                category, filename = path.split("/", 1)
+            except ValueError:
+                send_error_response(
+                    self,
+                    "Error: invalid delete path."
+                )
+                return
+
+            filename = filename.strip()
+
+            image = get_image_by_filename(filename)
+
+
+            if image is None:
+                send_error_response(
+                    self,
+                    "Error: image not found."
+                )
+                return
+
+            success = delete_image(filename)
+
+            if not success:
+                send_error_response(
+                    self,
+                    "Error: image file not found."
+                )
+                return
+
+            delete_image_metadata_by_filename(filename)
+
+            self.send_response(200)
+            self.end_headers()
+
+            return
 
         if self.path.startswith("/delete/"):
             image_id = self.path[len("/delete/"):]
@@ -442,12 +483,25 @@ class ImageServer(BaseHTTPRequestHandler):
             )
 
             if success:
+                update_image_filename(
+                    os.path.basename(old_filename),
+                    message
+                )
+
+                print(
+                    "DATABASE RENAME:",
+                    os.path.basename(old_filename),
+                    "->",
+                    message,
+                    flush=True
+                )
+
                 send_html(
                     self,
                     200,
                     f"""
                     <h1>Image renamed successfully!</h1>
-                    <p>{message}</p>
+                    <p>New filename: {message}</p>
                     <p>
                         <a href="/images/">
                             Back to gallery

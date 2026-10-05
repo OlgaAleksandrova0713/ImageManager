@@ -194,6 +194,84 @@ def get_image_by_id(image_id):
         cursor.close()
         connection.close()
 
+def get_image_by_filename(filename):
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            SELECT
+                id,
+                filename,
+                original_name,
+                size,
+                upload_time,
+                file_type
+            FROM images
+            WHERE filename = %s
+            """,
+            (filename,)
+        )
+
+        image = cursor.fetchone()
+
+        return image
+
+    finally:
+        cursor.close()
+        connection.close()
+
+def update_image_filename(old_filename, new_filename):
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            UPDATE images
+            SET filename = %s
+            WHERE filename = %s
+            """,
+            (new_filename, old_filename)
+        )
+
+        connection.commit()
+
+    except Exception:
+        connection.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        connection.close()
+
+def delete_image_metadata_by_filename(filename):
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            DELETE FROM images
+            WHERE filename = %s
+            """,
+            (filename,)
+        )
+
+        connection.commit()
+
+    except Exception:
+        connection.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        connection.close()
+
 def delete_image_metadata(image_id):
     connection = get_connection()
 
