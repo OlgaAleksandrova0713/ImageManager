@@ -81,6 +81,39 @@ class ImageServer(BaseHTTPRequestHandler):
             self.wfile.write(music)
             return
 
+        if self.path.startswith("/static/images/"):
+            image_name = self.path[len("/static/images/"):]
+
+            file_path = os.path.join(
+                "static",
+                "images",
+                image_name
+            )
+
+            if os.path.isfile(file_path):
+                with open(file_path, "rb") as file:
+                    image = file.read()
+
+                self.send_response(200)
+                self.send_header(
+                    "Content-Type",
+                    "image/jpeg"
+                )
+                self.send_header(
+                    "Content-Length",
+                    str(len(image))
+                )
+                self.end_headers()
+
+                self.wfile.write(image)
+                return
+
+            send_error_response(
+                self,
+                "Image not found."
+            )
+            return
+
         if self.path.startswith("/download/"):
             path = self.path[len("/download/"):]
 
