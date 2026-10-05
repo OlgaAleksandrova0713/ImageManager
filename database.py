@@ -1,12 +1,13 @@
 import psycopg2
+import os
 
 def get_connection():
     connection = psycopg2.connect(
-        host="db",
-        port=5432,
-        dbname="images_db",
-        user="postgres",
-        password="password"
+        host=os.environ.get("DB_HOST", "db"),
+        port=int(os.environ.get("DB_PORT", 5432)),
+        dbname=os.environ.get("DB_NAME", "images_db"),
+        user=os.environ.get("DB_USER", "postgres"),
+        password=os.environ.get("DB_PASSWORD", "password")
     )
 
     return connection
