@@ -81,6 +81,24 @@ class ImageServer(BaseHTTPRequestHandler):
             self.wfile.write(css)
             return
 
+        if self.path == "/static/images-list.css":
+            with open("static/images-list.css", "rb") as file:
+                css = file.read()
+
+            self.send_response(200)
+            self.send_header(
+                "Content-Type",
+                "text/css; charset=utf-8"
+            )
+            self.send_header(
+                "Content-Length",
+                str(len(css))
+            )
+            self.end_headers()
+
+            self.wfile.write(css)
+            return
+
         if self.path == "/static/music.mp3":
             with open("static/music.mp3", "rb") as file:
                 music = file.read()
