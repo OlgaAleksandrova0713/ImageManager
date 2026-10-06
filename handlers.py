@@ -1,5 +1,5 @@
 from http.server import BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, unquote
 import os
 
 from config import IMAGES_DIR, ALLOWED_EXTENSIONS
@@ -337,7 +337,7 @@ class ImageServer(BaseHTTPRequestHandler):
             return
 
         if self.path.startswith("/images/"):
-            image_path = self.path[len("/images/"):]
+            image_path = unquote(self.path[len("/images/"):])
 
             file_path = os.path.join(
                 IMAGES_DIR,
