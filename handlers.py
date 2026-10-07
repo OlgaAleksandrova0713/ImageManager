@@ -2,7 +2,7 @@ from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs, unquote
 import os
 
-from config import IMAGES_DIR, ALLOWED_EXTENSIONS
+from config import IMAGES_DIR,  UPLOADS_DIR, ALLOWED_EXTENSIONS
 from pages import home_page, upload_page, gallery_page, images_list_page
 from responses import send_html, send_error_response
 from upload import handle_upload
@@ -373,12 +373,20 @@ class ImageServer(BaseHTTPRequestHandler):
             return
 
         if self.path.startswith("/images/"):
-            image_path = unquote(self.path[len("/images/"):])
+            image_path = unquote(
+                self.path[len("/images/"):]
+            )
 
             file_path = os.path.join(
                 IMAGES_DIR,
                 image_path
             )
+
+            if not os.path.isfile(file_path):
+                file_path = os.path.join(
+                    UPLOADS_DIR,
+                    image_path
+                )
 
             if os.path.isfile(file_path):
                 with open(file_path, "rb") as file:
@@ -387,13 +395,14 @@ class ImageServer(BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header(
                     "Content-Type",
-                     "image/jpeg"
+                    "image/jpeg"
                 )
                 self.send_header(
                     "Content-Length",
                     str(len(content))
                 )
                 self.end_headers()
+
                 self.wfile.write(content)
                 return
 
@@ -500,13 +509,6 @@ class ImageServer(BaseHTTPRequestHandler):
             filename = image[1]
 
             success = delete_image(filename)
-
-            if not success:
-                send_error_response(
-                    self,
-                    "Error: image file not found."
-                )
-                return
 
             delete_image_metadata(image_id)
 

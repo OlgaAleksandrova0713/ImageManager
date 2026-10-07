@@ -1,6 +1,6 @@
 import os
 
-from config import IMAGES_DIR, ALLOWED_EXTENSIONS
+from config import IMAGES_DIR, UPLOADS_DIR, ALLOWED_EXTENSIONS
 from logger import logger
 
 def rename_image(old_filename, new_filename):
@@ -33,10 +33,19 @@ def rename_image(old_filename, new_filename):
         old_filename
     )
 
+    base_dir = IMAGES_DIR
+
+    if not os.path.isfile(old_path):
+        old_path = os.path.join(
+            UPLOADS_DIR,
+            old_filename
+        )
+        base_dir = UPLOADS_DIR
+
     category = os.path.dirname(old_filename)
 
     new_path = os.path.join(
-        IMAGES_DIR,
+        base_dir,
         category,
         new_filename
     )

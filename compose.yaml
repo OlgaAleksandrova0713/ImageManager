@@ -5,6 +5,7 @@ services:
       - "8000:8000"
     volumes:
           - ./images:/app/images
+          - ./uploads:/app/uploads
           - ./logs:/app/logs
 
   nginx:
@@ -13,6 +14,7 @@ services:
       - "8080:8080"
     volumes:
       - ./images:/images:ro
+      - ./uploads:/uploads:ro
       - ./static:/static:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
