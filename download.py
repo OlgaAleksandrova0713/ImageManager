@@ -1,6 +1,6 @@
 import os
 
-from config import IMAGES_DIR
+from config import IMAGES_DIR, UPLOADS_DIR
 
 
 def get_image_for_download(filename):
@@ -8,6 +8,12 @@ def get_image_for_download(filename):
         IMAGES_DIR,
         filename
     )
+
+    if not os.path.isfile(file_path):
+        file_path = os.path.join(
+            UPLOADS_DIR,
+            filename
+        )
 
     if not os.path.isfile(file_path):
         return None, None

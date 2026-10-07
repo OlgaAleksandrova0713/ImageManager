@@ -1,4 +1,5 @@
 import os
+from config import IMAGES_DIR, UPLOADS_DIR
 
 def home_page():
     return """
@@ -723,10 +724,24 @@ def images_list_page(images, page=1, total_image=0, deleted=None):
         file_type = image[5]
         category = find_image_category(filename)
 
+        if category:
+            upload_path = os.path.join(
+                UPLOADS_DIR,
+                category,
+                filename
+            )
+
+            if os.path.isfile(upload_path):
+                image_url = f"/uploads/{category}/{filename}"
+            else:
+                image_url = f"/images/{category}/{filename}"
+        else:
+            image_url = f"/images/{filename}"
+
         rows += f"""
         <tr>
             <td>
-                <a href="{f'/images/{category}/{filename}' if category else f'/images/{filename}'}">
+                <a href="{image_url}">
                     {filename}
                 </a>
             </td>
@@ -812,7 +827,7 @@ def images_list_page(images, page=1, total_image=0, deleted=None):
                                 message.remove();
                             }}, 300);
                         }}
-                    }}, 2000);
+                    }}, 3000);
                 </script>
                 
                 <table class="images-table">
@@ -903,13 +918,24 @@ def find_image_category(filename):
     ]
 
     for category in categories:
-        file_path = os.path.join(
-            "images",
+
+        image_path = os.path.join(
+            IMAGES_DIR,
             category,
             filename
         )
 
-        if os.path.isfile(file_path):
+        if os.path.isfile(image_path):
+            return category
+
+        upload_path = os.path.join(
+            UPLOADS_DIR,
+            category,
+            filename
+        )
+
+        if os.path.isfile(upload_path):
             return category
 
     return ""
+

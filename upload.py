@@ -3,7 +3,7 @@ from email.policy import default
 import os
 import uuid
 
-from config import IMAGES_DIR, MAX_FILE_SIZE, ALLOWED_EXTENSIONS
+from config import UPLOADS_DIR, MAX_FILE_SIZE, ALLOWED_EXTENSIONS
 from logger import logger
 from responses import send_html, send_error_response
 from database import save_image_metadata
@@ -104,7 +104,7 @@ def handle_upload(handler):
     unique_filename = f"{uuid.uuid4()}{extension}"
 
     category_dir = os.path.join(
-        IMAGES_DIR,
+        UPLOADS_DIR,
         category
     )
 
@@ -167,7 +167,7 @@ def handle_upload(handler):
             <div class="success-buttons">
 
                 <a
-                    href="/images/{category}/{unique_filename}"
+                    href="/uploads/{category}/{unique_filename}"
                      class="home-button"
                 >
                     Open image
