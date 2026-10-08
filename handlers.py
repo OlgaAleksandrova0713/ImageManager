@@ -372,6 +372,56 @@ class ImageServer(BaseHTTPRequestHandler):
             )
             return
 
+        if self.path.startswith("/uploads/"):
+            upload_path = unquote(
+                self.path[len("/uploads/"):]
+            )
+
+            file_path = os.path.join(
+                UPLOADS_DIR,
+                upload_path
+            )
+
+            if os.path.isfile(file_path):
+                with open(file_path, "rb") as file:
+                    content = file.read()
+
+                extension = os.path.splitext(
+                    file_path
+                )[1].lower()
+
+                content_types = {
+                    ".jpg": "image/jpeg",
+                    ".jpeg": "image/jpeg",
+                    ".png": "image/png",
+                    ".gif": "image/gif"
+                }
+
+                content_type = content_types.get(
+                    extension,
+                    "application/octet-stream"
+                )
+
+                self.send_response(200)
+                self.send_header(
+                    "Content-Type",
+                    content_type
+                )
+                self.send_header(
+                    "Content-Length",
+                    str(len(content))
+                )
+                self.end_headers()
+
+                self.wfile.write(content)
+                return
+
+            send_error_response(
+                self,
+                "Page not found."
+            )
+            return
+
         if self.path.startswith("/images/"):
             image_path = unquote(
                 self.path[len("/images/"):]
