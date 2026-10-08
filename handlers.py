@@ -22,6 +22,31 @@ from database import (
 
 class ImageServer(BaseHTTPRequestHandler):
 
+    def get_category_images(self,category):
+        images = []
+
+        images_dir = os.path.join(
+            IMAGES_DIR,
+            category
+        )
+
+        if os.path.isdir(images_dir):
+            for filename in os.listdir(images_dir):
+                if os.path.splitext(filename)[1].lower() in ALLOWED_EXTENSIONS:
+                    images.append((category, filename))
+
+        uploads_dir = os.path.join(
+            UPLOADS_DIR,
+            category
+        )
+
+        if os.path.isdir(uploads_dir):
+            for filename in os.listdir(uploads_dir):
+                if os.path.splitext(filename)[1].lower() in ALLOWED_EXTENSIONS:
+                    images.append((category, filename))
+
+        return images
+
     def do_GET(self):
 
         if self.path == "/":
@@ -185,19 +210,7 @@ class ImageServer(BaseHTTPRequestHandler):
             return
 
         if self.path == "/category/fruits":
-            category_dir = os.path.join(
-                IMAGES_DIR,
-                "fruits"
-            )
-
-            files = os.listdir(category_dir)
-
-            image_file = [
-                file
-                for file in files
-                if os.path.splitext(file)[1].lower()
-                in ALLOWED_EXTENSIONS
-            ]
+            image_file = self.get_category_images("fruits")
 
             send_html(
                 self,
@@ -210,19 +223,7 @@ class ImageServer(BaseHTTPRequestHandler):
             return
 
         if self.path == "/category/nature":
-            category_dir = os.path.join(
-                IMAGES_DIR,
-                "nature"
-            )
-
-            files = os.listdir(category_dir)
-
-            image_file = [
-                file
-                for file in files
-                if os.path.splitext(file)[1].lower()
-                in ALLOWED_EXTENSIONS
-            ]
+            image_file = self.get_category_images("nature")
 
             send_html(
                 self,
@@ -235,19 +236,7 @@ class ImageServer(BaseHTTPRequestHandler):
             return
 
         if self.path == "/category/style":
-            category_dir = os.path.join(
-                IMAGES_DIR,
-                "style"
-            )
-
-            files = os.listdir(category_dir)
-
-            image_file = [
-                file
-                for file in files
-                if os.path.splitext(file)[1].lower()
-                   in ALLOWED_EXTENSIONS
-            ]
+            image_file = self.get_category_images("style")
 
             send_html(
                 self,
@@ -260,19 +249,7 @@ class ImageServer(BaseHTTPRequestHandler):
             return
 
         if self.path == "/category/animals":
-            category_dir = os.path.join(
-                IMAGES_DIR,
-                "animals"
-            )
-
-            files = os.listdir(category_dir)
-
-            image_file = [
-                file
-                for file in files
-                if os.path.splitext(file)[1].lower()
-                   in ALLOWED_EXTENSIONS
-            ]
+            image_file = self.get_category_images("animals")
 
             send_html(
                 self,
@@ -285,19 +262,7 @@ class ImageServer(BaseHTTPRequestHandler):
             return
 
         if self.path == "/category/city":
-            category_dir = os.path.join(
-                IMAGES_DIR,
-                "city"
-            )
-
-            files = os.listdir(category_dir)
-
-            image_file = [
-                file
-                for file in files
-                if os.path.splitext(file)[1].lower()
-                   in ALLOWED_EXTENSIONS
-            ]
+            image_file = self.get_category_images("city")
 
             send_html(
                 self,
@@ -310,19 +275,7 @@ class ImageServer(BaseHTTPRequestHandler):
             return
 
         if self.path == "/category/other":
-            category_dir = os.path.join(
-                IMAGES_DIR,
-                "other"
-            )
-
-            files = os.listdir(category_dir)
-
-            image_file = [
-                file
-                for file in files
-                if os.path.splitext(file)[1].lower()
-                   in ALLOWED_EXTENSIONS
-            ]
+            image_file = self.get_category_images("other")
 
             send_html(
                 self,
@@ -347,21 +300,8 @@ class ImageServer(BaseHTTPRequestHandler):
             all_images = []
 
             for category in categories:
-                category_dir = os.path.join(
-                    IMAGES_DIR,
-                    category
-                )
-
-                if not os.path.isdir(category_dir):
-                    continue
-
-                files = os.listdir(category_dir)
-
-                for filename in files:
-                    if os.path.splitext(filename)[1].lower() in ALLOWED_EXTENSIONS:
-                        all_images.append(
-                            (category, filename)
-                        )
+                category_images = self.get_category_images(category)
+                all_images.extend(category_images)
 
             send_html(
                 self,

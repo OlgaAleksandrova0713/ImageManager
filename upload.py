@@ -14,15 +14,6 @@ def handle_upload(handler):
         handler.headers.get("Content-Length", 0)
     )
 
-    if content_length > MAX_FILE_SIZE:
-        handler.rfile.read(content_length)
-
-        send_error_response(
-            handler,
-            "Размер файла превышает допустимые 5 MB."
-        )
-        return
-
     content_type = handler.headers.get("Content-Type", "")
 
     if "multipart/form-data" not in content_type:
@@ -45,7 +36,7 @@ def handle_upload(handler):
     )
 
     category = None
-    image_part = None
+    image_parts = []
 
     for part in message.iter_parts():
 
@@ -55,10 +46,12 @@ def handle_upload(handler):
         )
 
         if field_name == "category":
-            category = part.get_payload(decode=True).decode("utf-8").strip()
+            category = part.get_payload(
+                decode=True
+            ).decode("utf-8").strip()
 
         elif field_name == "image":
-            image_part = part
+            image_parts.append(part)
 
     if not category:
         send_error_response(
@@ -67,41 +60,14 @@ def handle_upload(handler):
         )
         return
 
-    if image_part is None:
+    if not image_parts:
         send_error_response(
             handler,
             "No file selected."
         )
         return
 
-    filename = image_part.get_filename()
-
-    if not filename:
-        send_error_response(
-            handler,
-            "No file selected."
-        )
-        return
-
-    extension = os.path.splitext(filename)[1].lower()
-
-    if extension not in ALLOWED_EXTENSIONS:
-        send_error_response(
-            handler,
-            "Invalid file format." "Allowed: JPG, PNG, GIF."
-        )
-        return
-
-    file_data = image_part.get_payload(decode=True)
-
-    if len(file_data) > MAX_FILE_SIZE:
-        send_error_response(
-            handler,
-            "The file size exceeds the 5 MB limit."
-        )
-        return
-
-    unique_filename = f"{uuid.uuid4()}{extension}"
+    uploaded_files = []
 
     category_dir = os.path.join(
         UPLOADS_DIR,
@@ -113,29 +79,76 @@ def handle_upload(handler):
         exist_ok=True
     )
 
-    file_path = os.path.join(
-        category_dir,
-        unique_filename
-    )
+    for image_part in image_parts:
 
-    with open(file_path, "wb") as file:
-        file.write(file_data)
+        filename = image_part.get_filename()
 
-    save_image_metadata(
-        unique_filename,
-        filename,
-        len(file_data),
-        extension
-    )
+        if not filename:
+            continue
 
-    logger.info(
-        "Успех: изображение %s загружено.",
-        unique_filename
-    )
+        extension = os.path.splitext(
+            filename
+        )[1].lower()
 
-    print(
-        f"SUCCESS: изображение {unique_filename} загружено."
-    )
+        if extension not in ALLOWED_EXTENSIONS:
+            send_error_response(
+                handler,
+                f"Invalid file format: {filename}. "
+                "Allowed: JPG, PNG, GIF."
+            )
+            return
+
+        file_data = image_part.get_payload(
+            decode=True
+        )
+
+        if len(file_data) > MAX_FILE_SIZE:
+            send_error_response(
+                handler,
+                f"The file {filename} exceeds "
+                "the 5 MB limit."
+            )
+            return
+
+        unique_filename = (
+            f"{uuid.uuid4()}{extension}"
+        )
+
+        file_path = os.path.join(
+            category_dir,
+            unique_filename
+        )
+
+        with open(file_path, "wb") as file:
+            file.write(file_data)
+
+        save_image_metadata(
+            unique_filename,
+            filename,
+            len(file_data),
+            extension
+        )
+
+        uploaded_files.append(
+            unique_filename
+        )
+
+        logger.info(
+            "Успех: изображение %s загружено.",
+            unique_filename
+        )
+
+        print(
+            f"SUCCESS: изображение "
+            f"{unique_filename} загружено."
+        )
+
+    if not uploaded_files:
+        send_error_response(
+            handler,
+            "No valid files selected."
+        )
+        return
 
     response = f"""
     <!DOCTYPE html>
@@ -156,51 +169,57 @@ def handle_upload(handler):
 
             <div class="upload-card">
 
-            <h1 class="success-title">
-                ✓ Image uploaded successfully!
-            </h1>
+                <h1 class="success-title">
+                    ✓ Images uploaded successfully!
+                </h1>
 
-            <p class="success-text">
-                Your image has been uploaded successfully.
-            </p>
+                <p class="success-text">
+                    {len(uploaded_files)}
+                    image(s) uploaded successfully.
+                </p>
 
-            <div class="success-buttons">
+                <div class="success-buttons">
 
-                <a
-                    href="/uploads/{category}/{unique_filename}"
-                     class="home-button"
-                >
-                    Open image
-                </a>
+                    <a
+                        href="/upload"
+                        class="home-button"
+                    >
+                        Upload more
+                    </a>
 
-                <a
-                    href="/upload"
-                    class="home-button"
-                >
-                    Upload another
-                </a>
+                    <a
+                        href="/images-list"
+                        class="home-button"
+                    >
+                        Images List
+                    </a>
 
-                <a
-                    href="/"
-                    class="home-button"
-                >
-                    Home
-                </a>
+                    <a
+                        href="/"
+                        class="home-button"
+                    >
+                        Home
+                    </a>
+
+                </div>
 
             </div>
 
+            <audio controls loop>
+                <source
+                    src="/static/music.mp3"
+                    type="audio/mpeg"
+                >
+                Your browser does not support
+                the audio element.
+            </audio>
+
         </div>
 
-        <audio controls loop>
-            <source src="/static/music.mp3" type="audio/mpeg">
-                Your browser does not support the audio element.
-        </audio>
-        
-    </div>
+    </body>
+    </html>
+    """
 
-</body>
-</html>
-"""
     send_html(
         handler,
         200,
