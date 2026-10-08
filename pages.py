@@ -183,6 +183,7 @@ def upload_page():
                     type="file"
                     name="image"
                     accept=".jpg,.png,.gif"
+                    multiple
                     required
                 >
                 
@@ -295,13 +296,24 @@ def gallery_page(image_files, category=None):
             else image_filename
         )
 
+        upload_path = os.path.join(
+            UPLOADS_DIR,
+            image_category or "",
+            image_filename
+        )
+
+        if os.path.isfile(upload_path):
+            image_url = f"/uploads/{image_path}"
+        else:
+            image_url = f"/images/{image_path}"
+
         html += f"""
             <div class="image-card" 
                 data-filename="{image_filename}"
                 data-category="{image_category or ''}">
                 
-                <img src="/images/{image_path}"
-                    onclick="openImage('/images/{image_path}')"
+                <img src="{image_url}"
+                    onclick="openImage('{image_url}')"
                     style="width:200px; height:200px; object-fit:cover; cursor:pointer;">
                      
                 <div class="image-name">
