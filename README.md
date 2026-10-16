@@ -1,5 +1,5 @@
 # ImageManager
-ImageManager is a simple image upload and gallery server built with Python, Docker and Nginx.
+ImageManager is a simple image upload and gallery server.
 
 ## Live Demo
 **Try the application:** [ImageManager on Railway](https://imagemanager-production.up.railway.app)
